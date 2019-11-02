@@ -140,7 +140,6 @@ sensor:
     lambda: |-
       return {
         get_linp_doorbell(doorbell)->volume_sensor,
-        get_linp_doorbell(doorbell)->playing_sensor,
         get_linp_doorbell(doorbell)->chime1_sensor,
         get_linp_doorbell(doorbell)->chime2_sensor,
         get_linp_doorbell(doorbell)->chime3_sensor,
@@ -150,11 +149,11 @@ sensor:
         get_linp_doorbell(doorbell)->chime7_sensor,
         get_linp_doorbell(doorbell)->chime8_sensor,
         get_linp_doorbell(doorbell)->chime9_sensor,
-        get_linp_doorbell(doorbell)->chime10_sensor
+        get_linp_doorbell(doorbell)->chime10_sensor,
+        get_linp_doorbell(doorbell)->playing_sensor
       };
     sensors:
       - name: "Volume"
-      - name: "Tune Playing" # Optional
       - name: "Button 1 Tune"
       - name: "Button 2 Tune"
       - name: "Button 3 Tune"
@@ -165,6 +164,7 @@ sensor:
       - name: "Button 8 Tune"
       - name: "Button 9 Tune"
       - name: "Button 10 Tune"
+      - name: "Tune Playing" # Optional
 
 # Binary sensors are optional, mostly useful if you want to use them for local
 # automation on the ESPHome node.  Home Assistant events are automatically
