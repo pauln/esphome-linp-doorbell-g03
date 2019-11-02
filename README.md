@@ -38,6 +38,7 @@ I chose the PlatformIO board configuration `esp32doit-devkit-v1`, as the pinout 
 ## Configuration
 - Set your own WiFi credentials in the `wifi:` section of the YAML file, so that it knows how to connect to your network
 - In the `sensor:` and `binary_sensor:` sections, you can reduce the number of `Button X Tune` and `Button X` entries if you only want to have states for the buttons which you actually have
+- If your button-triggered automation will be solely handled by Home Assistant (i.e. you're not intending to use ESPHome's on-node automation), you can remove the optional parts of the yaml - the entire `binary_sensor:` section and the "Tune Playing" `sensor`.
 
 ## Flashing the ESP32
 In order to boot the ESP32 into flash mode (so that you can write ESPHome to it), you'll need to pull the two pins closest the bottom right corner of the ESP32 module to ground; I did this by soldering fine wires to the two pins and one of the ground pads (either from the test points listed above, or the second from the top on the "P3" test points to the left of the ESP32), but if you have an easier way to reliably short the two corner pads to ground temporarily, anything which is easy to undo should work fine.
