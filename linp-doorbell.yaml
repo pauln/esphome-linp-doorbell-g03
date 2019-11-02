@@ -154,7 +154,7 @@ sensor:
       };
     sensors:
       - name: "Volume"
-      - name: "Tune Playing"
+      - name: "Tune Playing" # Optional
       - name: "Button 1 Tune"
       - name: "Button 2 Tune"
       - name: "Button 3 Tune"
@@ -166,6 +166,9 @@ sensor:
       - name: "Button 9 Tune"
       - name: "Button 10 Tune"
 
+# Binary sensors are optional, mostly useful if you want to use them for local
+# automation on the ESPHome node.  Home Assistant events are automatically
+# triggered whether or not these binary sensors are set up.
 binary_sensor:
   - platform: custom
     lambda: |-
@@ -192,4 +195,3 @@ binary_sensor:
       - name: "Button 8"
       - name: "Button 9"
       - name: "Button 10"
-

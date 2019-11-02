@@ -5,37 +5,41 @@
 #define get_linp_doorbell(constructor) static_cast<LinpDoorbell *> \
   (const_cast<custom_component::CustomComponentConstructor *>(&constructor)->get_component(0))
 
-class LinpDoorbell : public Component {
+class LinpDoorbell : public Component, CustomAPIDevice {
  DataQueue<String> commandQueue;
  DataQueue<String> requests;
- DataQueue<int> buttonPresses;
+ #ifdef LOG_BINARY_SENSOR
+  DataQueue<int> buttonPresses;
+ #endif
  bool isChiming = false;
 
  public:
   Sensor *volume_sensor = new Sensor("Volume");
   Sensor *playing_sensor = new Sensor("Chime Playing");
-  BinarySensor *button1_sensor = new BinarySensor("Button 1");
-  BinarySensor *button2_sensor = new BinarySensor("Button 2");
-  BinarySensor *button3_sensor = new BinarySensor("Button 3");
-  BinarySensor *button4_sensor = new BinarySensor("Button 4");
-  BinarySensor *button5_sensor = new BinarySensor("Button 5");
-  BinarySensor *button6_sensor = new BinarySensor("Button 6");
-  BinarySensor *button7_sensor = new BinarySensor("Button 7");
-  BinarySensor *button8_sensor = new BinarySensor("Button 8");
-  BinarySensor *button9_sensor = new BinarySensor("Button 9");
-  BinarySensor *button10_sensor = new BinarySensor("Button 10");
-  BinarySensor *button_sensors[10] = {
-    button1_sensor,
-    button2_sensor,
-    button3_sensor,
-    button4_sensor,
-    button5_sensor,
-    button6_sensor,
-    button7_sensor,
-    button8_sensor,
-    button9_sensor,
-    button10_sensor
-  };
+  #ifdef LOG_BINARY_SENSOR
+    BinarySensor *button1_sensor = new BinarySensor("Button 1");
+    BinarySensor *button2_sensor = new BinarySensor("Button 2");
+    BinarySensor *button3_sensor = new BinarySensor("Button 3");
+    BinarySensor *button4_sensor = new BinarySensor("Button 4");
+    BinarySensor *button5_sensor = new BinarySensor("Button 5");
+    BinarySensor *button6_sensor = new BinarySensor("Button 6");
+    BinarySensor *button7_sensor = new BinarySensor("Button 7");
+    BinarySensor *button8_sensor = new BinarySensor("Button 8");
+    BinarySensor *button9_sensor = new BinarySensor("Button 9");
+    BinarySensor *button10_sensor = new BinarySensor("Button 10");
+    BinarySensor *button_sensors[10] = {
+      button1_sensor,
+      button2_sensor,
+      button3_sensor,
+      button4_sensor,
+      button5_sensor,
+      button6_sensor,
+      button7_sensor,
+      button8_sensor,
+      button9_sensor,
+      button10_sensor
+    };
+  #endif
   Sensor *chime1_sensor = new Sensor("Button 1 Tune");
   Sensor *chime2_sensor = new Sensor("Button 2 Tune");
   Sensor *chime3_sensor = new Sensor("Button 3 Tune");
@@ -59,7 +63,11 @@ class LinpDoorbell : public Component {
     chime10_sensor
   };
 
-  LinpDoorbell() : commandQueue(255), requests(255), buttonPresses(255) { }
+  #ifdef LOG_BINARY_SENSOR
+    LinpDoorbell() : commandQueue(255), requests(255), buttonPresses(255) { }
+  #else
+    LinpDoorbell() : commandQueue(255), requests(255) { }
+  #endif
 
   float get_setup_priority() const { return setup_priority::HARDWARE; }
 
@@ -82,11 +90,13 @@ class LinpDoorbell : public Component {
   }
 
   String handleMessage(String received) {
-    if (!buttonPresses.isEmpty()) {
-      // Revert button state to `false`.
-      int buttonIndex = buttonPresses.dequeue();
-      button_sensors[buttonIndex]->publish_state(false);
-    }
+    #ifdef LOG_BINARY_SENSOR
+      if (!buttonPresses.isEmpty()) {
+        // Revert button state to `false`.
+        int buttonIndex = buttonPresses.dequeue();
+        button_sensors[buttonIndex]->publish_state(false);
+      }
+    #endif
     if (isChiming) {
       isChiming = false;
       playing_sensor->publish_state(0.0);
@@ -144,12 +154,19 @@ class LinpDoorbell : public Component {
     if (event.startsWith("switch_pressed_")) {
       event.remove(0, 15);
       int buttonIndex = atoi(event.c_str());
-      buttonPresses.enqueue(buttonIndex);
-      button_sensors[buttonIndex]->publish_state(true);
+      #ifdef LOG_BINARY_SENSOR
+        buttonPresses.enqueue(buttonIndex);
+        button_sensors[buttonIndex]->publish_state(true);
+      #endif
+
+      char buttonStr[2];
+      itoa(buttonIndex+1, buttonStr, 10); // Increment to get a 1-based number
+      fire_homeassistant_event("esphome.linp_doorbell_button_pressed", {{"button", buttonStr}});
     } else if(event.startsWith("bell_ring")) {
       event.remove(0, 10);
       playing_sensor->publish_state(parse_float(event.c_str()).value());
       isChiming = true;
+      fire_homeassistant_event("esphome.linp_doorbell_tune_played", {{"tune", event.c_str()}});
     } else if(event.startsWith("learn_success")) {
       // Button learning succeded; request a fresh list (event supplies a list, but it's space-separated).
       commandQueue.enqueue("down get_switch_list");
