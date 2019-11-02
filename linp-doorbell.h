@@ -75,6 +75,13 @@ class LinpDoorbell : public Component, CustomAPIDevice {
     Serial2.begin(115200);
     commandQueue.enqueue("down get_volume");
     commandQueue.enqueue("down get_switch_list");
+
+    register_service(&LinpDoorbell::setVolume, "linp_set_volume", {"volume"});
+    register_service(&LinpDoorbell::playTune, "linp_play_tune", {"tune"});
+    register_service(&LinpDoorbell::learnButton, "linp_learn_button", {"tune"});
+    register_service(&LinpDoorbell::setTune, "linp_set_tune", {"button", "tune"});
+    register_service(&LinpDoorbell::forgetButton, "linp_forget_button", {"button"});
+    register_service(&LinpDoorbell::sendRawCommand, "linp_send_raw_command", {"command"});
   }
 
   void loop() override {
@@ -267,8 +274,8 @@ class LinpDoorbell : public Component, CustomAPIDevice {
     requests.enqueue(String("switch_list"));
   }
 
-  void sendRawCommand(String command) {
+  void sendRawCommand(std::string command) {
     ESP_LOGI("linp-doorbell", "Sending raw command: %s", command.c_str());
-    commandQueue.enqueue(command);
+    commandQueue.enqueue(String(command.c_str()));
   }
 };

@@ -16,124 +16,16 @@ wifi:
   ssid: 'your-wifi-ssid-here'
   password: 'put-your-wifi-password-here'
 
-globals:
-  - id: doorbell_new_volume
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_tune_to_play
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_tune_to_learn
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_tune_for_button
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_button
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_button_to_forget
-    type: int
-    restore_value: no
-    initial_value: '0'
-  - id: doorbell_raw_command
-    type: String
-    restore_value: no
-    initial_value: 'String("down none")'
-
 # Enable Home Assistant API
 api:
   password: 'set-an-api-password-here'
-  services:
-    - service: set_volume
-      variables:
-        volume: int
-      then:
-        - globals.set:
-            id: doorbell_new_volume
-            value: !lambda 'return volume;'
-        - script.execute: doorbell_set_volume
-    - service: play_tune
-      variables:
-        tune: int
-      then:
-        - globals.set:
-            id: doorbell_tune_to_play
-            value: !lambda 'return tune;'
-        - script.execute: doorbell_play_tune
-    - service: learn_button
-      variables:
-        tune: int
-      then:
-        - globals.set:
-            id: doorbell_tune_to_learn
-            value: !lambda 'return tune;'
-        - script.execute: doorbell_learn_button
-    - service: set_tune
-      variables:
-        button: int
-        tune: int
-      then:
-        - globals.set:
-            id: doorbell_tune_for_button
-            value: !lambda 'return tune;'
-        - globals.set:
-            id: doorbell_button
-            value: !lambda 'return button;'
-        - script.execute: doorbell_set_tune
-    - service: forget_button
-      variables:
-        button: int
-      then:
-        - globals.set:
-            id: doorbell_button_to_forget
-            value: !lambda 'return button;'
-        - script.execute: doorbell_forget_button
-    - service: send_raw_command
-      variables:
-        command: string
-      then:
-        - globals.set:
-            id: doorbell_raw_command
-            value: !lambda 'return String(command.c_str());'
-        - script.execute: doorbell_send_raw_command
 
 custom_component:
 - id: doorbell
   lambda: |-
     auto doorbell = new LinpDoorbell();
     App.register_component(doorbell);
-    return {doorbell}; 
-
-script:
-  - id: doorbell_set_volume
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->setVolume(id(doorbell_new_volume));'
-
-  - id: doorbell_play_tune
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->playTune(id(doorbell_tune_to_play));'
-
-  - id: doorbell_learn_button
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->learnButton(id(doorbell_tune_to_learn));'
-
-  - id: doorbell_set_tune
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->setTune(id(doorbell_button), id(doorbell_tune_for_button));'
-
-  - id: doorbell_forget_button
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->forgetButton(id(doorbell_button_to_forget));'
-
-  - id: doorbell_send_raw_command
-    then:
-      lambda: 'get_linp_doorbell(doorbell)->sendRawCommand(id(doorbell_raw_command));'
+    return {doorbell};
 
 sensor:
   - platform: custom
