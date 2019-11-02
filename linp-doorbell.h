@@ -98,7 +98,7 @@ class LinpDoorbell : public Component {
       String value = String(received);
       value.remove(0, 7);
       if (!value.equals("\"ok\"")) {
-	if (requests.isEmpty()) {
+	      if (requests.isEmpty()) {
           ESP_LOGI("linp-doorbell", "Unexpected property received: %s", value);
         } else {
           String param = requests.dequeue();
@@ -122,7 +122,7 @@ class LinpDoorbell : public Component {
         return String("down none");
       } else {
         String response = commandQueue.dequeue();
-	ESP_LOGI("linp-doorbell", "Sending command: %s", response.c_str());
+	      ESP_LOGI("linp-doorbell", "Sending command: %s", response.c_str());
         if (response.startsWith("down get_")) {
           // Strip the "down get_" prefix off.
           String request = String(response);
@@ -171,7 +171,7 @@ class LinpDoorbell : public Component {
         }
         String tune = value.substring(offset, commaPos);
         auto tuneFloat = parse_float(tune.c_str());
-	if (tune.equals("255")) {
+	      if (tune.equals("255")) {
           tuneFloat = -1;
         }
         chime_sensors[i]->publish_state(tuneFloat.value());
