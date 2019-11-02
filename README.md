@@ -50,3 +50,17 @@ In order to boot the ESP32 into flash mode (so that you can write ESPHome to it)
 5. Once the compilation is complete, you'll be prompted to choose how to perform the update; choose your serial-to-USB adapter
 6. Once the flashing is complete, unplug the doorbell from the 5V power supply, remove the short from the corner pads to GND, then power it back up to boot normally
 7. The ESP32 should start up and connect to your WiFi network as configured in the yaml file; you can then add it to your Home Assistant and start integrating it into your home automation!
+
+## Home Assistant
+Once you have your doorbell flashed with ESPHome and connected to Home Assistant, you should see the following services appear (if not, try power cycling the doorbell so that it reconnects to Home Assistant; I've found that the services don't seem to appear on first connect):
+
+| Service name  | Description | Parameter 1 | Parameter 2 |
+| ------------- | ----------- | ----------- | ----------- |
+| `esphome.linp_doorbell_linp_set_volume` | Set the volume (`0` to mute) | `volume` \[int, 0-4]  |  |
+| `esphome.linp_doorbell_linp_play_tune` | Play a tune/chime | `tune` \[int, 1-36]  |  |
+| `esphome.linp_doorbell_linp_learn_button` | Register a new button, setting its tune/chime to the specified value | `tune` \[int, 1-36]  |  |
+| `esphome.linp_doorbell_linp_set_tune` | Set the tune/chime for an already-registered button | `button` \[int, 1-10]  | `tune` \[int, 1-36] |
+| `esphome.linp_doorbell_linp_forget_button` | Unregister a button from this unit | `button` \[int, 1-10]  |  |
+| `esphome.linp_doorbell_linp_send_raw_command` | Enqueue a raw command to be sent to the STM8S005K6 | `command` \[string]  |  |
+
+Note that the `linp_doorbell` prefix on all service names is the name of your ESPHome node, as defined in the `esphome:` block of your yaml file.
