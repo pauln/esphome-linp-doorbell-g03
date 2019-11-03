@@ -28,24 +28,23 @@ custom_component:
     return {doorbell};
 
 sensor:
+  # Doorbell volume sensor (recommended)
   - platform: custom
-    lambda: |-
-      return {
-        get_linp_doorbell(doorbell)->volume_sensor,
-        get_linp_doorbell(doorbell)->chime1_sensor,
-        get_linp_doorbell(doorbell)->chime2_sensor,
-        get_linp_doorbell(doorbell)->chime3_sensor,
-        get_linp_doorbell(doorbell)->chime4_sensor,
-        get_linp_doorbell(doorbell)->chime5_sensor,
-        get_linp_doorbell(doorbell)->chime6_sensor,
-        get_linp_doorbell(doorbell)->chime7_sensor,
-        get_linp_doorbell(doorbell)->chime8_sensor,
-        get_linp_doorbell(doorbell)->chime9_sensor,
-        get_linp_doorbell(doorbell)->chime10_sensor,
-        get_linp_doorbell(doorbell)->playing_sensor
-      };
+    lambda: return {get_linp_doorbell(doorbell)->volume_sensor};
     sensors:
       - name: "Volume"
+
+  # Doorbell "chime playing" sensor (optional)
+  - platform: custom
+    lambda: return {get_linp_doorbell(doorbell)->playing_sensor};
+    sensors:
+      - name: "Tune Playing"
+
+  # Tune/Chime configuration (one per button, optional)
+  - platform: custom
+    lambda: |-
+      return std::vector<Sensor*>(get_linp_doorbell(doorbell)->chime_sensors, std::end(get_linp_doorbell(doorbell)->chime_sensors));
+    sensors:
       - name: "Button 1 Tune"
       - name: "Button 2 Tune"
       - name: "Button 3 Tune"
@@ -56,26 +55,12 @@ sensor:
       - name: "Button 8 Tune"
       - name: "Button 9 Tune"
       - name: "Button 10 Tune"
-      - name: "Tune Playing" # Optional
 
-# Binary sensors are optional, mostly useful if you want to use them for local
-# automation on the ESPHome node.  Home Assistant events are automatically
-# triggered whether or not these binary sensors are set up.
+# Binary sensors for button presses (optional)
 binary_sensor:
   - platform: custom
     lambda: |-
-      return {
-        get_linp_doorbell(doorbell)->button1_sensor,
-        get_linp_doorbell(doorbell)->button2_sensor,
-        get_linp_doorbell(doorbell)->button3_sensor,
-        get_linp_doorbell(doorbell)->button4_sensor,
-        get_linp_doorbell(doorbell)->button5_sensor,
-        get_linp_doorbell(doorbell)->button6_sensor,
-        get_linp_doorbell(doorbell)->button7_sensor,
-        get_linp_doorbell(doorbell)->button8_sensor,
-        get_linp_doorbell(doorbell)->button9_sensor,
-        get_linp_doorbell(doorbell)->button10_sensor
-      };
+      return std::vector<BinarySensor*>(get_linp_doorbell(doorbell)->button_sensors, std::end(get_linp_doorbell(doorbell)->button_sensors));
     binary_sensors:
       - name: "Button 1"
       - name: "Button 2"

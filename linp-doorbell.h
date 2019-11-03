@@ -11,11 +11,11 @@ class LinpDoorbell : public Component, CustomAPIDevice {
  #ifdef LOG_BINARY_SENSOR
   DataQueue<int> buttonPresses;
  #endif
- bool isChiming = false;
+ #ifdef LOG_SENSOR
+  bool isChiming = false;
+ #endif
 
  public:
-  Sensor *volume_sensor = new Sensor("Volume");
-  Sensor *playing_sensor = new Sensor("Chime Playing");
   #ifdef LOG_BINARY_SENSOR
     BinarySensor *button1_sensor = new BinarySensor("Button 1");
     BinarySensor *button2_sensor = new BinarySensor("Button 2");
@@ -40,28 +40,32 @@ class LinpDoorbell : public Component, CustomAPIDevice {
       button10_sensor
     };
   #endif
-  Sensor *chime1_sensor = new Sensor("Button 1 Tune");
-  Sensor *chime2_sensor = new Sensor("Button 2 Tune");
-  Sensor *chime3_sensor = new Sensor("Button 3 Tune");
-  Sensor *chime4_sensor = new Sensor("Button 4 Tune");
-  Sensor *chime5_sensor = new Sensor("Button 5 Tune");
-  Sensor *chime6_sensor = new Sensor("Button 6 Tune");
-  Sensor *chime7_sensor = new Sensor("Button 7 Tune");
-  Sensor *chime8_sensor = new Sensor("Button 8 Tune");
-  Sensor *chime9_sensor = new Sensor("Button 9 Tune");
-  Sensor *chime10_sensor = new Sensor("Button 10 Tune");
-  Sensor *chime_sensors[10] = {
-    chime1_sensor,
-    chime2_sensor,
-    chime3_sensor,
-    chime4_sensor,
-    chime5_sensor,
-    chime6_sensor,
-    chime7_sensor,
-    chime8_sensor,
-    chime9_sensor,
-    chime10_sensor
-  };
+  #ifdef LOG_SENSOR
+    Sensor *volume_sensor = new Sensor("Volume");
+    Sensor *playing_sensor = new Sensor("Chime Playing");
+    Sensor *chime1_sensor = new Sensor("Button 1 Tune");
+    Sensor *chime2_sensor = new Sensor("Button 2 Tune");
+    Sensor *chime3_sensor = new Sensor("Button 3 Tune");
+    Sensor *chime4_sensor = new Sensor("Button 4 Tune");
+    Sensor *chime5_sensor = new Sensor("Button 5 Tune");
+    Sensor *chime6_sensor = new Sensor("Button 6 Tune");
+    Sensor *chime7_sensor = new Sensor("Button 7 Tune");
+    Sensor *chime8_sensor = new Sensor("Button 8 Tune");
+    Sensor *chime9_sensor = new Sensor("Button 9 Tune");
+    Sensor *chime10_sensor = new Sensor("Button 10 Tune");
+    Sensor *chime_sensors[10] = {
+      chime1_sensor,
+      chime2_sensor,
+      chime3_sensor,
+      chime4_sensor,
+      chime5_sensor,
+      chime6_sensor,
+      chime7_sensor,
+      chime8_sensor,
+      chime9_sensor,
+      chime10_sensor
+    };
+  #endif
 
   #ifdef LOG_BINARY_SENSOR
     LinpDoorbell() : commandQueue(255), requests(255), buttonPresses(255) { }
@@ -104,10 +108,13 @@ class LinpDoorbell : public Component, CustomAPIDevice {
         button_sensors[buttonIndex]->publish_state(false);
       }
     #endif
-    if (isChiming) {
-      isChiming = false;
-      playing_sensor->publish_state(0.0);
-    }
+
+    #ifdef LOG_SENSOR
+      if (isChiming) {
+        isChiming = false;
+        playing_sensor->publish_state(0.0);
+      }
+    #endif
 
     if (received.equals("net")) {
       return String("local");
@@ -161,6 +168,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
     if (event.startsWith("switch_pressed_")) {
       event.remove(0, 15);
       int buttonIndex = atoi(event.c_str());
+      
       #ifdef LOG_BINARY_SENSOR
         buttonPresses.enqueue(buttonIndex);
         button_sensors[buttonIndex]->publish_state(true);
@@ -171,8 +179,12 @@ class LinpDoorbell : public Component, CustomAPIDevice {
       fire_homeassistant_event("esphome.linp_doorbell_button_pressed", {{"button", buttonStr}});
     } else if(event.startsWith("bell_ring")) {
       event.remove(0, 10);
-      playing_sensor->publish_state(parse_float(event.c_str()).value());
-      isChiming = true;
+
+      #ifdef LOG_SENSOR
+        playing_sensor->publish_state(parse_float(event.c_str()).value());
+        isChiming = true;
+      #endif
+
       fire_homeassistant_event("esphome.linp_doorbell_tune_played", {{"tune", event.c_str()}});
     } else if(event.startsWith("learn_success")) {
       // Button learning succeded; request a fresh list (event supplies a list, but it's space-separated).
@@ -182,26 +194,28 @@ class LinpDoorbell : public Component, CustomAPIDevice {
 
   void handleParam(String param, String value) {
     ESP_LOGI("linp-doorbell", "Param received: %s = %s", param.c_str(), value.c_str());
-    if (param.equals("volume")) {
-      volume_sensor->publish_state(parse_float(value.c_str()).value());
-    } else if (param.equals("switch_list")) {
-      // Comma-separated list of button tunes.
-      int offset = 0;
-      for(int i=0; i<10; i++) {
-        int commaPos = value.indexOf(',', offset);
-        if (commaPos == -1 && i < 9) {
-          // Comma not found.  Value might be malformed; we won't be able to find any more tunes, so stop here.
-          break;
+    #ifdef LOG_SENSOR
+      if (param.equals("volume")) {
+        volume_sensor->publish_state(parse_float(value.c_str()).value());
+      } else if (param.equals("switch_list")) {
+        // Comma-separated list of button tunes.
+        int offset = 0;
+        for(int i=0; i<10; i++) {
+          int commaPos = value.indexOf(',', offset);
+          if (commaPos == -1 && i < 9) {
+            // Comma not found.  Value might be malformed; we won't be able to find any more tunes, so stop here.
+            break;
+          }
+          String tune = value.substring(offset, commaPos);
+          auto tuneFloat = parse_float(tune.c_str());
+          if (tune.equals("255")) {
+            tuneFloat = -1;
+          }
+          chime_sensors[i]->publish_state(tuneFloat.value());
+          offset = commaPos + 1;
         }
-        String tune = value.substring(offset, commaPos);
-        auto tuneFloat = parse_float(tune.c_str());
-	      if (tune.equals("255")) {
-          tuneFloat = -1;
-        }
-        chime_sensors[i]->publish_state(tuneFloat.value());
-        offset = commaPos + 1;
       }
-    }
+    #endif
   }
 
   void setVolume(int volume) {
