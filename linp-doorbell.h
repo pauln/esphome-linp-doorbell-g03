@@ -246,7 +246,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
 	
   void stopTune() {
     ESP_LOGI("linp-doorbell", "Stopping tune");
-    commandQueue.enqueue(String("down stop_tune"));
+    commandQueue.enqueue(String("down stop_play"));
   }
 
   void learnButton(int tune) {
