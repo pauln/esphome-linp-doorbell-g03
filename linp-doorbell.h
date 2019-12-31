@@ -82,6 +82,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
 
     register_service(&LinpDoorbell::setVolume, "linp_set_volume", {"volume"});
     register_service(&LinpDoorbell::playTune, "linp_play_tune", {"tune"});
+    register_service(&LinpDoorbell::stopTune, "linp_stop_tune");
     register_service(&LinpDoorbell::learnButton, "linp_learn_button", {"tune"});
     register_service(&LinpDoorbell::setTune, "linp_set_tune", {"button", "tune"});
     register_service(&LinpDoorbell::forgetButton, "linp_forget_button", {"button"});
@@ -241,6 +242,11 @@ class LinpDoorbell : public Component, CustomAPIDevice {
     String command = String("down play_specified_music ");
     command.concat(tune);
     commandQueue.enqueue(command);
+  }
+	
+  void stopTune() {
+    ESP_LOGI("linp-doorbell", "Stopping tune");
+    commandQueue.enqueue(String("down stop_play"));
   }
 
   void learnButton(int tune) {
