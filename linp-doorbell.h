@@ -124,7 +124,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
       value.remove(0, 7);
       if (!value.equals("\"ok\"")) {
 	      if (requests.isEmpty()) {
-          ESP_LOGI("linp-doorbell", "Unexpected property received: %s", value);
+          ESP_LOGI("linp-doorbell", "Unexpected property received: %s", value.c_str());
         } else {
           String param = requests.dequeue();
           handleParam(param, value);
