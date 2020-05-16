@@ -1,15 +1,15 @@
 #include "esphome.h"
-#include "Queue.h"
+#include "ArduinoQueue.h"
 
 
 #define get_linp_doorbell(constructor) static_cast<LinpDoorbell *> \
   (const_cast<custom_component::CustomComponentConstructor *>(&constructor)->get_component(0))
 
 class LinpDoorbell : public Component, CustomAPIDevice {
- DataQueue<String> commandQueue;
- DataQueue<String> requests;
+ ArduinoQueue<String> commandQueue;
+ ArduinoQueue<String> requests;
  #ifdef LOG_BINARY_SENSOR
-  DataQueue<int> buttonPresses;
+  ArduinoQueue<int> buttonPresses;
  #endif
  #ifdef LOG_SENSOR
   bool isChiming = false;
