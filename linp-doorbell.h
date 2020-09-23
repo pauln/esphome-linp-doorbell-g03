@@ -14,6 +14,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
  #ifdef LOG_SENSOR
   bool isChiming = false;
  #endif
+ bool hasSetVolume = false;
 
  public:
   #ifdef LOG_BINARY_SENSOR
@@ -77,6 +78,7 @@ class LinpDoorbell : public Component, CustomAPIDevice {
 
   void setup() override {
     Serial2.begin(115200);
+    hasSetVolume = false;
     commandQueue.enqueue("down get_volume");
     commandQueue.enqueue("down get_switch_list");
 
@@ -197,6 +199,15 @@ class LinpDoorbell : public Component, CustomAPIDevice {
     ESP_LOGI("linp-doorbell", "Param received: %s = %s", param.c_str(), value.c_str());
     #ifdef LOG_SENSOR
       if (param.equals("volume")) {
+      	if (!hasSetVolume) {
+      	  // Volume needs to be reset on boot to put it back to the last set value.
+      	  // This also jogs the doorbell to life so that it'll actually chime on first button press.
+      	  // If we don't do this, it won't chime on first press but will on subsequent presses.
+      	  int initialVolume = atoi(value.c_str());
+      	  ESP_LOGI("linp-doorbell", "Setting initial volume: %i", initialVolume);
+      	  hasSetVolume = true;
+      	  setVolume(initialVolume);
+      	}
         volume_sensor->publish_state(parse_float(value.c_str()).value());
       } else if (param.equals("switch_list")) {
         // Comma-separated list of button tunes.
