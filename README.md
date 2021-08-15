@@ -36,7 +36,7 @@ I chose the PlatformIO board configuration `esp32doit-devkit-v1`, as the pinout 
 - A serial-to-USB adapter
 
 ## Configuration
-- Set your own WiFi credentials in the `wifi:` section of the YAML file, so that it knows how to connect to your network
+- Set your own WiFi credentials in the `wifi:` section of the YAML file, so that it knows how to connect to your network.  The example config now uses the !secret directive; [see the ESPHome docs for information](https://esphome.io/guides/faq.html) if you're not familiar with this.
 - In the `sensor:` and `binary_sensor:` sections, you can reduce the number of `Button X Tune` and `Button X` entries if you only want to have states for the buttons which you actually have
 - If your button-triggered automation will be solely handled by Home Assistant (i.e. you're not intending to use ESPHome's on-node automation), you can remove the optional parts of the yaml - the entire `binary_sensor:` section and the "Tune Playing" `sensor`.
 - Technically, all of the sensors are optional (as of v0.4) - but it probably makes sense to keep at least the `Volume` sensor, and perhaps the `Button X Tune` sensor(s) for as many buttons as you have, so that the doorbell's current configuration is reported to Home Assistant.  The remaining sensors may not be much use unless you plan to use on-node ESPHome automations.
@@ -57,13 +57,15 @@ Once you have your doorbell flashed with ESPHome and connected to Home Assistant
 
 | Service name  | Description | Parameter 1 | Parameter 2 |
 | ------------- | ----------- | ----------- | ----------- |
-| `esphome.linp_doorbell_linp_set_volume` | Set the volume (`0` to mute) | `volume` \[int, 0-4]  |  |
-| `esphome.linp_doorbell_linp_play_tune` | Play a tune/chime | `tune` \[int, 1-36]  |  |
-| `esphome.linp_doorbell_linp_learn_button` | Register a new button, setting its tune/chime to the specified value | `tune` \[int, 1-36]  |  |
-| `esphome.linp_doorbell_linp_set_tune` | Set the tune/chime for an already-registered button | `button` \[int, 1-10]  | `tune` \[int, 1-36] |
-| `esphome.linp_doorbell_linp_forget_button` | Unregister a button from this unit | `button` \[int, 1-10]  |  |
-| `esphome.linp_doorbell_linp_send_raw_command` | Enqueue a raw command to be sent to the STM8S005K6 | `command` \[string]  |  |
+| `esphome.linp_doorbell_set_volume` | Set the volume (`0` to mute) | `volume` \[int, 0-4]  |  |
+| `esphome.linp_doorbell_play_tune` | Play a tune/chime | `tune` \[int, 1-36]  |  |
+| `esphome.linp_doorbell_learn_button` | Register a new button, setting its tune/chime to the specified value | `tune` \[int, 1-36]  |  |
+| `esphome.linp_doorbell_set_tune` | Set the tune/chime for an already-registered button | `button` \[int, 1-10]  | `tune` \[int, 1-36] |
+| `esphome.linp_doorbell_forget_button` | Unregister a button from this unit | `button` \[int, 1-10]  |  |
+| `esphome.linp_doorbell_send_raw_command` | Enqueue a raw command to be sent to the STM8S005K6 | `command` \[string]  |  |
 
 Note that the `linp_doorbell` prefix on all service names is the name of your ESPHome node, as defined in the `esphome:` block of your yaml file.
+
+Earlier versions of this component had an additional `linp_` affix between the node name and service name, i.e. `esphome.linp_doorbell_linp_set_volume`; if you wish to restore this in order to avoid having to update scripts/automations/etc, add the `use_old_service_names: True` option to the `linp_doorbell` sensor configuration block (as per the commented-out line in the sample config).
 
 If these services don't appear in Home Assistant, try power cycling the doorbell so that it reconnects to Home Assistant.  I've found that the services don't seem to appear on first connect, but do on the second.
