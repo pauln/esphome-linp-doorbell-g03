@@ -12,6 +12,9 @@ float LinpDoorbellComponent::get_setup_priority() const { return setup_priority:
 void LinpDoorbellComponent::setup() {
   Serial2.begin(115200);
   hasSetVolume = false;
+  commandQueue.enqueue("down none");
+  commandQueue.enqueue("down none");
+  commandQueue.enqueue("down none");
   commandQueue.enqueue("down get_volume");
   commandQueue.enqueue("down get_switch_list");
 
