@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, UNIT_EMPTY
 
 linp_doorbell_ns = cg.esphome_ns.namespace("linp_doorbell")
 
@@ -17,8 +17,16 @@ CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(LinpDoorbellComponent),
-            cv.Optional(CONF_VOLUME): sensor.sensor_schema(),
-            cv.Optional(CONF_CHIME_PLAYING): sensor.sensor_schema(),
+            cv.Optional(CONF_VOLUME): sensor.sensor_schema(
+                UNIT_EMPTY,
+                "mdi:volume-high",
+                0,
+            ),
+            cv.Optional(CONF_CHIME_PLAYING): sensor.sensor_schema(
+                UNIT_EMPTY,
+                "mdi:music",
+                0,
+            ),
             cv.Optional(CONF_USE_OLD_SERVICE_NAMES, default=False): cv.boolean,
         }
     )
@@ -41,3 +49,4 @@ async def to_code(config):
     cg.add(var.set_use_old_service_names(config[CONF_USE_OLD_SERVICE_NAMES]))
 
     cg.add_library("ArduinoQueue", "1.2.3")
+
