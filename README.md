@@ -1,5 +1,10 @@
 # ESPHome custom component for linp-doorbell-g03
 
+## WARNING - new incompatible board revision
+This custom component (including the `external_components` branch) was built for a version of the doorbell which runs the doorbell functionality on a separate microcontroller (see below) which communicates with the ESP32 over serial.  However, a new revision appears to have removed this secondary microcontroller (presumably the ESP32 is now handling this, interfacing directly with a CMT2217B OOK RF receiver), thereby rendering this custom component incompatible with newer hardware.
+
+The device still carries the same model number externally, so unfortunately, there may not be an easy way to tell which version you have before you crack the case open.  **Before you attempt to flash this firmware to your doorbell**, you should check whether your board matches the [photos in the issue discussing the new revision](https://github.com/pauln/esphome-linp-doorbell-g03/issues/23#issuecomment-984352857), as this component won't do anything of use on the new revision.  The board revision details can be found under a sticker beside the ESP32 if you'd like confirmation of which you have - see the aforementioned issue for more details.
+
 ## Background
 The linp-doorbell-g03 is a wifi doorbell with a self-powered button.  It's part of the Mijia (Xiaomi smart home) ecosystem, but it unfortunately doesn't seem to announce events (such as the button being pressed) on the local network.  As such, this project aims to provide replacement firmware to enable full local control via [ESPHome](https://esphome.io/) - which provides for simple integration with [Home Assistant](https://www.home-assistant.io/).
 
