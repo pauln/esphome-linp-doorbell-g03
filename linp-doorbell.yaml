@@ -19,6 +19,9 @@ wifi:
 # Enable Home Assistant API
 api:
   password: 'set-an-api-password-here'
+# Enable OTA update
+ota:
+  password: 'set-an-api-password-here'
 
 custom_component:
 - id: doorbell
