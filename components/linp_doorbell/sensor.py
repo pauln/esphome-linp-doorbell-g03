@@ -3,7 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import sensor
 from esphome.const import CONF_ID, UNIT_EMPTY
 
-linp_doorbell_ns = cg.esphome_ns.namespace("linp_doorbell")
+linp_doorbell_ns = cg.esphome_ns.namespace("sensor.linp_doorbell")
 
 LinpDoorbellComponent = linp_doorbell_ns.class_(
     "LinpDoorbellComponent", cg.Component
