@@ -18,14 +18,12 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(LinpDoorbellComponent),
             cv.Optional(CONF_VOLUME): sensor.sensor_schema(
-                UNIT_EMPTY,
-                "mdi:volume-high",
-                0,
+                unit_of_measurement=UNIT_EMPTY,
+                accuracy_decimals=0,
             ),
             cv.Optional(CONF_CHIME_PLAYING): sensor.sensor_schema(
-                UNIT_EMPTY,
-                "mdi:music",
-                0,
+                unit_of_measurement=UNIT_EMPTY,
+                accuracy_decimals=0,
             ),
             cv.Optional(CONF_USE_OLD_SERVICE_NAMES, default=False): cv.boolean,
         }
