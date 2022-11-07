@@ -126,7 +126,7 @@ void LinpDoorbellComponent::handleEvent(String event) {
     event.remove(0, 10);
 
     if (this->chime_playing_sensor_ != nullptr)
-      this->chime_playing_sensor_->publish_state(parse_float(event.c_str()).value());
+      this->chime_playing_sensor_->publish_state(parse_number<float>(event.c_str()).value());
     isChiming = true;
 
     fire_homeassistant_event("esphome.linp_doorbell_tune_played", {
@@ -152,7 +152,7 @@ void LinpDoorbellComponent::handleParam(String param, String value) {
       setVolume(initialVolume);
     }
     if (this->volume_sensor_ != nullptr)
-      this->volume_sensor_->publish_state(parse_float(value.c_str()).value());
+      this->volume_sensor_->publish_state(parse_number<float>(value.c_str()).value());
   } else if (param.equals("switch_list")) {
     // Comma-separated list of button tunes.
     int offset = 0;
@@ -163,7 +163,7 @@ void LinpDoorbellComponent::handleParam(String param, String value) {
         break;
       }
       String tune = value.substring(offset, commaPos);
-      auto tuneFloat = parse_float(tune.c_str());
+      auto tuneFloat = parse_number<float>(tune.c_str());
       if (tune.equals("255")) {
         tuneFloat = -1;
       }
